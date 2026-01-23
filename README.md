@@ -7,14 +7,13 @@
 ## Parte 1 - Introducción a Hilos en Java
 
 1.
-
     ![Definición del ciclo de vida de un hilo](img/Parte_1_img_1.png)
 
 2. 
 	i. ![Intervalos](img/Parte_1_img_2.png)
 	ii. ![Inicio de hilos con start](img/Parte_1_img_3.png)
-		iii. Salida por pantalla
-		```text
+	iii. Salida por pantalla
+	```text
 	T1: 0
 	T3: 200
 	T2: 99
