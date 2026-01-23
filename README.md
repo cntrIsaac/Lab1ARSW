@@ -11,9 +11,10 @@
 ![Definición del ciclo de vida de un hilo](img/Parte_1_img_1.png)
 
 2.
-
+Creación de Intervalos
 ![Intervalos](img/Parte_1_img_2.png)
 
+Inicio de hilos con start().
 ![Inicio de hilos con start](img/Parte_1_img_3.png)
 
 Salida por pantalla con start().
