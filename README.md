@@ -21,7 +21,7 @@ Inicio de hilos con start().
 
 Salida por pantalla con start().
 
-	```text
+
 	T1: 0
 	T3: 200
 	T2: 99
@@ -324,7 +324,7 @@ Salida por pantalla con start().
 	T3: 299
 	T2: 199
 	El conteo de hilos ha terminado.
-	```
+
 
 Salida por pantalla con run()
 
@@ -631,7 +631,7 @@ Salida por pantalla con run()
 	main: 298
 	main: 299
 	El conteo de hilos ha terminado.
-	
+
 
 ¿Que cambia si uso start o run?
 
