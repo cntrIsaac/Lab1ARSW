@@ -653,14 +653,14 @@ Pruebas de la clase:
 
 2. Con respecto a la clase HostBlackListValidator implementé el método checkHost para que cree varios hilos, cada hilo busca en su rango y guarda los índices donde encontró la IP en una cola compartida; además hay un contador compartido de coincidencias y una bandera que indica que deben detenerse cuando se alcanzan 5 detecciones, los hilos se inician y se espera a que terminen (join), luego se reporta la IP como no confiable o confiable según el contador, se registra en el log cuántas listas se consultaron y se devuelve la lista de servidores donde fue encontrada la IP.
 
-- Dividí la búsqueda en N hilos: cada hilo revisa su tramo, guarda dónde encuentra la IP y contamos todas las coincidencias; esperamos a que terminen (join), sumamos los resultados y si hay ≥5 la marcamos como no confiable y mostramos las listas donde apareció. Dejé una sobrecarga sin N que llama a la nueva y el LOG informa cuántas listas se consultaron.
+Dividí la búsqueda en N hilos: cada hilo revisa su tramo, guarda dónde encuentra la IP y contamos todas las coincidencias; esperamos a que terminen (join), sumamos los resultados y si hay ≥5 la marcamos como no confiable y mostramos las listas donde apareció. Dejé una sobrecarga sin N que llama a la nueva y el LOG informa cuántas listas se consultaron.
 
 ![](img/Parte_2_img_3.png)
 
 ![](img/Parte_2_img_4.png)
 
 
-- Al momento de Ejecutar Main, comprobé que efectivamente, la dirección IP 200.24.34.55 no es confiable, porque se encontro en 5 listas.
+Al momento de Ejecutar Main, comprobé que efectivamente, la dirección IP 200.24.34.55 no es confiable, porque se encontro en 5 listas.
 
 	ene 23, 2026 2:20:30 PM edu.eci.arsw.spamkeywordsdatasource.HostBlacklistsDataSourceFacade reportAsNotTrustworthy
 	INFORMACIËN: HOST 200.24.34.55 Reported as NOT trustworthy
@@ -668,7 +668,7 @@ Pruebas de la clase:
 	INFORMACIËN: Checked Black Lists:8.007 of 80.000
 	The host was found in the following blacklists:[23, 50, 200, 500, 1000]
 
-- La dirección IP 202.24.34.55 si es confiable, pues no aparece en ninguna lista
+La dirección IP 202.24.34.55 si es confiable, pues no aparece en ninguna lista
 
 	ene 23, 2026 2:33:41 PM edu.eci.arsw.spamkeywordsdatasource.HostBlacklistsDataSourceFacade reportAsTrustworthy
 	INFORMACIËN: HOST 212.24.24.55 Reported as trustworthy
@@ -676,7 +676,7 @@ Pruebas de la clase:
 	INFORMACIËN: Checked Black Lists:80.000 of 80.000
 	IP probada: 212.24.24.55 -> Listas encontradas: []
 
-- La dirección IP 202.24.34.55 no es confiable, pues aparece en listas muy distribuidas, pero aparece en 5 de ellas, por lo tanto, no es segura.
+La dirección IP 202.24.34.55 no es confiable, pues aparece en listas muy distribuidas, pero aparece en 5 de ellas, por lo tanto, no es segura.
 
 	ene 23, 2026 2:33:26 PM edu.eci.arsw.spamkeywordsdatasource.HostBlacklistsDataSourceFacade reportAsNotTrustworthy
 	INFORMACIËN: HOST 202.24.34.55 Reported as NOT trustworthy
