@@ -14,9 +14,25 @@ import java.util.List;
 public class Main {
     
     public static void main(String a[]){
-        HostBlackListsValidator hblv=new HostBlackListsValidator();
-        List<Integer> blackListOcurrences=hblv.checkHost("200.24.34.55");
-        System.out.println("The host was found in the following blacklists:"+blackListOcurrences);
+        HostBlackListsValidator hblv = new HostBlackListsValidator();
+
+        // Prueba 1: IP que suele aparecer dispersa en varias listas
+        String ip1 = "202.24.34.55";
+        List<Integer> occ1 = hblv.checkHost(ip1);
+        System.out.println("IP probada: " + ip1 + " -> Listas encontradas: " + occ1);
+        System.out.println("-------------------------");
+
+        // Prueba 2: IP que no debería aparecer en ninguna lista
+        String ip2 = "212.24.24.55";
+        List<Integer> occ2 = hblv.checkHost(ip2);
+        System.out.println("IP probada: " + ip2 + " -> Listas encontradas: " + occ2);
+        System.out.println("-------------------------");
+
+        // (Opcional) prueba original para comparar
+        String ip0 = "200.24.34.55";
+        List<Integer> occ0 = hblv.checkHost(ip0);
+        System.out.println("IP probada: " + ip0 + " -> Listas encontradas: " + occ0);
+        System.out.println("-------------------------");
         
     }
     
