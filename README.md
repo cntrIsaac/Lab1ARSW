@@ -6,14 +6,15 @@
 
 ## Parte 1 - Introducción a Hilos en Java
 
-1. 
-	![Definición del ciclo de vida de un hilo](img/Parte_1_img_1.png)
+1.
+
+    ![Definición del ciclo de vida de un hilo](img/Parte_1_img_1.png)
 
 2. 
 	i. ![Intervalos](img/Parte_1_img_2.png)
 	ii. ![Inicio de hilos con start](img/Parte_1_img_3.png)
-	iii. Salida por pantalla
-	´´´bash
+		iii. Salida por pantalla
+		```text
 	T1: 0
 	T3: 200
 	T2: 99
@@ -315,12 +316,12 @@
 	T2: 198
 	T3: 299
 	T2: 199
-	El conteo de hilos ha terminado.	
-	´´´
+	El conteo de hilos ha terminado.
+	```
 
 	iv. Cambio de start() por run().
 
-	´´´bash
+	```text
 	main: 0
 	main: 1
 	main: 2
@@ -623,7 +624,7 @@
 	main: 298
 	main: 299
 	El conteo de hilos ha terminado.
-	´´´
+	```
 
 	¿Que cambia si uso start o run?
 
