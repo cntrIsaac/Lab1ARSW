@@ -631,8 +631,8 @@ Salida por pantalla con run()
 	El conteo de hilos ha terminado.
 	```
 
-	¿Que cambia si uso start o run?
+¿Que cambia si uso start o run?
 
-	- Con start() se crean hilos nuevos y la salida es concurrente e intercalada, cada linea aparece con el nombre del hilo (T1,T2,T3)
+- Con start() se crean hilos nuevos y la salida es concurrente e intercalada, cada linea aparece con el nombre del hilo (T1,T2,T3)
 
-	- Con run() no se crean hilos nuevos, todo se ejecuta en el hilo actual (en este caso main) secuencialmente. La salida se imprimirá en bloque, pues salen primero todos los numeros de [0..99], luego de [99..199], y por ultimo los de [199..299]. Además las líneas estarán prefijadas por el nombre del hilo actual, porque Thread.currentThread().getName devuelve main.
+- Con run() no se crean hilos nuevos, todo se ejecuta en el hilo actual (en este caso main) secuencialmente. La salida se imprimirá en bloque, pues salen primero todos los numeros de [0..99], luego de [99..199], y por ultimo los de [199..299]. Además las líneas estarán prefijadas por el nombre del hilo actual, porque Thread.currentThread().getName devuelve main.
