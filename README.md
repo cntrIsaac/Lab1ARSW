@@ -16,7 +16,8 @@
 
 ![Inicio de hilos con start](img/Parte_1_img_3.png)
 
-	iii. Salida por pantalla
+Salida por pantalla con start().
+
 	```text
 	T1: 0
 	T3: 200
@@ -322,7 +323,8 @@
 	El conteo de hilos ha terminado.
 	```
 
-	iv. Cambio de start() por run().
+Salida por pantalla con run()
+
 
 	```text
 	main: 0
