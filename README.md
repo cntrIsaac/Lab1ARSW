@@ -9,9 +9,16 @@
 1.
     ![Definición del ciclo de vida de un hilo](img/Parte_1_img_1.png)
 
-2. 
-	i. ![Intervalos](img/Parte_1_img_2.png)
-	ii. ![Inicio de hilos con start](img/Parte_1_img_3.png)
+2.
+
+	i. 
+
+![Intervalos](img/Parte_1_img_2.png)
+
+	ii.
+
+![Inicio de hilos con start](img/Parte_1_img_3.png)
+
 	iii. Salida por pantalla
 	```text
 	T1: 0
