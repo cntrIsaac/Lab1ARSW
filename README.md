@@ -687,3 +687,164 @@ La dirección IP 202.24.34.55 no es confiable, pues aparece en listas muy distri
 
 2.1.  Se puede usar un contador atómico compartido (por ejemplo, AtomicInteger) junto con un mecanismo de cancelación cooperativa (como un AtomicBoolean, Future.cancel() o Thread.interrupt()) para que cada hilo verifique si debe continuar antes de hacer una nueva comprobación. Cuando un hilo encuentra una coincidencia, incrementa el contador y, al alcanzar el límite definido, se detienen las demás tareas. Esto ayuda a evitar trabajo innecesario, aunque introduce estado compartido y sincronización, lo que implica prestar atención a posibles condiciones de carrera y al manejo adecuado de interrupciones y limpieza de recursos.
 
+
+## Parte 3 - Pruebas de rendimiento
+
+Para esta parte hicimos experimentos con diferentes numeros de hilos para ver cual funciona mejor. Usamos la IP 202.24.34.55 porque esta dispersa en las listas entonces toma mas tiempo encontrarla.
+
+Probamos con:
+- 1 hilo (secuencial)
+- N hilos (donde N es el numero de nucleos del procesador)
+- 2N hilos (el doble)
+- 50 hilos
+- 100 hilos
+
+Modificamos el Main.java para que haga las pruebas automaticamente y mida los tiempos.
+
+### Resultados
+
+La maquina que usamos tiene 8 nucleos (segun Runtime.getRuntime().availableProcessors())
+
+Tiempos obtenidos:
+
+	Numero de hilos    |    Tiempo (ms)    |    Listas revisadas
+	----------------------------------------------------------------
+	1                   |    92331         |    70.501
+	8                   |    1370          |    8.015
+	16                  |    1342          |    16.028
+	50                  |    1386          |    50.144
+	100                 |    860           |    59.957
+	----------------------------------------------------------------
+
+### Observaciones con jVisualVM
+
+![Metricas de jVisualVM](img/jvisualvm-p3.png)
+
+Lo que vimos en los graficos de VisualVM:
+
+**CPU Usage:**
+- Se mantiene muy bajo la mayor parte del tiempo
+- Tiene picos pequeños cuando se ejecutan las pruebas
+- No llega a saturarse al 100% como esperabamos, probablemente porque cada consulta tiene delay (IO-bound)
+
+**Heap Memory:**
+- Heap size configurado en mas o menos 200 MB
+- Used heap (la parte azul) se mantiene muy bajo, como en 50-80 MB
+- No hay mucha presion de memoria ni GC
+- Bastante estable durante todas las pruebas
+
+**Threads:**
+- Live threads: 17 activos al final
+- Live peak: 110 - esto confirma que cuando corrio la prueba de 100 hilos si se crearon todos
+- Total started: 209 hilos (suma de todas las pruebas)
+- El grafico muestra un pico grande donde llego a casi 110 hilos simultaneos (cuando corrio la prueba de 100)
+
+**Classes:**
+- Total loaded: 1,738 clases
+- Se mantiene constante
+
+**Por configuracion:**
+
+**1 hilo:** Solo se ve 1 hilo trabajando, CPU baja, tarda mucho
+
+**8 hilos:** Se ven los 8 hilos activos en el grafico, CPU sube
+
+**16 hilos:** El grafico muestra 16 hilos trabajando en paralelo
+
+**50 hilos:** Pico de ~50 hilos en el grafico
+
+**100 hilos:** El pico mas grande - llego a 110 hilos (100 workers + algunos del sistema)
+- Creemos que funciono mejor porque como hay tantos hilos buscando en paralelo, encontraron las 5 ocurrencias distribuidas mas rapido
+- Mas memoria usada pero valio la pena
+
+### Grafica de resultados
+
+Hicimos una grafica en excel con los datos:
+
+![Grafica de desempeño](img/Parte_3_grafica.png)
+
+Lo interesante es que el grafico muestra una caida drastica de 1 hilo a 8 hilos, y luego 100 hilos resulto siendo el mas rapido. Esto es diferente a lo que esperabamos.
+
+
+## Parte 4 - Analisis con la Ley de Amdahl
+
+### Pregunta 1: ¿Por qué el mejor desempeño no se logra con 500 hilos? ¿Cómo se compara con 200 hilos?
+
+Aunque no probamos con 500 hilos directamente, podemos inferir lo que pasaria basandonos en lo que vimos:
+
+La ley de Amdahl dice que:
+```
+S(n) = 1 / (1-P + P/n)
+```
+
+Donde:
+- S(n) = mejora teorica
+- P = fraccion paralelizable
+- n = numero de hilos
+
+En teoria, mientras mas hilos tengamos, mejor deberia ser el desempeño. PERO en la practica hay varios problemas con muchos hilos:
+
+**Por que 500 hilos no seria mejor:**
+
+1. **Overhead de creacion y coordinacion**: Crear y gestionar 500 hilos consume tiempo y recursos. Nuestro programa tiene que:
+   - Crear 500 objetos Thread
+   - Iniciar cada uno con start()
+   - Hacer join() a los 500 al final
+   - Coordinar con las variables atomicas (AtomicInteger, AtomicBoolean)
+
+2. **Contencion en recursos compartidos**: Los 500 hilos estarian todos tratando de acceder simultaneamente a:
+   - `globalOccurrences` (AtomicInteger)
+   - `stopFlag` (AtomicBoolean)
+   - `foundServers` (ConcurrentLinkedQueue)
+   - `checkedListsCount` (AtomicInteger)
+   
+   Esto genera muchas colisiones y espera.
+
+3. **Context switching**: El procesador solo puede ejecutar 8 hilos realmente en paralelo. Con 500 hilos, el sistema operativo tiene que estar constantemente cambiando entre ellos, perdiendo tiempo.
+
+4. **Memoria**: Cada hilo ocupa ~1MB de stack. 500 hilos = 500MB solo en stacks, mas la memoria del heap.
+
+**Comparacion con 200 hilos:**
+
+Si probamos con 200 hilos, probablemente seria mas lento que 100 hilos por las mismas razones. El overhead empezaria a superar los beneficios. Creemos que el tiempo seria algo como 1200-1500ms, peor que los 860ms que conseguimos con 100.
+
+### Pregunta 2: ¿Cómo se comporta la solución con N núcleos vs 2N núcleos?
+
+En nuestro caso:
+- **8 hilos (N nucleos):** 1370 ms
+- **16 hilos (2N nucleos):** 1342 ms
+
+La diferencia es minima, solo 28 ms o ~2% de mejora. Esto pasa porque:
+
+- Con 8 hilos ya estamos usando todos los nucleos fisicos
+- Con 16 hilos aprovechamos hyperthreading, pero la mejora es marginal
+- El hyperthreading no duplica la capacidad, solo permite mejor uso de recursos ociosos
+- Para este problema IO-bound, la mejora de 8 a 16 es casi imperceptible
+
+En problemas CPU-bound puro, probablemente no habria ninguna mejora pasando de N a 2N.
+
+### Pregunta 3: ¿Y si usamos 1 hilo en 100 máquinas? ¿O c hilos en 100/c máquinas?
+
+**Escenario 1: 1 hilo en cada una de 100 maquinas**
+
+- No habria contencion en las variables compartidas (cada maquina tendria sus propias variables)
+- No habria context switching
+- Cada hilo correria en su propio procesador dedicado
+- El unico overhead seria la comunicacion de red entre maquinas
+
+La fraccion paralelizable P seria mucho mas alta porque eliminamos casi todo el overhead de sincronizacion.
+
+El problema seria coordinar cual maquina revisa que rango y como saber cuando alguna encontro las 5 ocurrencias para detener a las demas. Pero esto se puede hacer con mensajes por red, que es mas rapido que la contencion de 100 hilos en una sola maquina.
+
+**Escenario 2: c hilos en 100/c maquinas, donde c = nucleos por maquina**
+
+- Si c = 8 como nuestro procesador, tendriamos 8 hilos en 12.5 maquinas redondeando a 13 maquinas
+- Cada maquina usaria todos sus nucleos eficientemente
+- Minimizamos overhead de crear demasiados hilos
+- Menos contencion porque hay menos hilos compitiendo por los mismos recursos en cada maquina
+- Mejor balance entre paralelismo y overhead
+
+Por ejemplo: 8 hilos x 13 maquinas = 104 hilos totales, pero distribuidos optimamente.
+
+
+
