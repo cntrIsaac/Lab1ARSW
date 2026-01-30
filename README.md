@@ -685,3 +685,5 @@ La dirección IP 202.24.34.55 no es confiable, pues aparece en listas muy distri
 	IP probada: 202.24.34.55 -> Listas encontradas: [29, 10034, 20200, 70500, 31000]
 
 
+2.1.  Se puede usar un contador atómico compartido (por ejemplo, AtomicInteger) junto con un mecanismo de cancelación cooperativa (como un AtomicBoolean, Future.cancel() o Thread.interrupt()) para que cada hilo verifique si debe continuar antes de hacer una nueva comprobación. Cuando un hilo encuentra una coincidencia, incrementa el contador y, al alcanzar el límite definido, se detienen las demás tareas. Esto ayuda a evitar trabajo innecesario, aunque introduce estado compartido y sincronización, lo que implica prestar atención a posibles condiciones de carrera y al manejo adecuado de interrupciones y limpieza de recursos.
+
