@@ -3,6 +3,11 @@
 ### Arquitecturas de Software - ARSW
 ## Ejercicio Introducción al paralelismo - Hilos - Caso BlackListSearch
 
+**Integrantes:**
+- Isaac Palomo
+- Sebastian Duque
+
+---
 
 ## Parte 1 - Introducción a Hilos en Java
 
