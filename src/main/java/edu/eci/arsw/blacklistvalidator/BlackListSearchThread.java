@@ -2,7 +2,6 @@ package edu.eci.arsw.blacklistvalidator;
 
 import edu.eci.arsw.spamkeywordsdatasource.HostBlacklistsDataSourceFacade;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -18,40 +17,34 @@ public class BlackListSearchThread extends Thread {
     private final String host;
     private final AtomicInteger globalOccurrences;
     private final ConcurrentLinkedQueue<Integer> foundServers;
-    private final AtomicBoolean stopFlag;
     private final AtomicInteger checkedListsCount;
+    private final int alarmThreshold;
 
     private int localOccurrencesFound = 0;
-
-    // Mantener el mismo umbral que el validador original (no modificar la fachada)
-    private static final int BLACK_LIST_ALARM_COUNT = 5;
 
     public BlackListSearchThread(int startIndex, int endIndex, String host,
             AtomicInteger globalOccurrences,
             ConcurrentLinkedQueue<Integer> foundServers,
-            AtomicBoolean stopFlag,
-            AtomicInteger checkedListsCount) {
+            AtomicInteger checkedListsCount,
+            int alarmThreshold) {
         super("BLSearch-" + startIndex + "-" + endIndex);
         this.startIndex = startIndex;
         this.endIndex = endIndex;
         this.host = host;
         this.globalOccurrences = globalOccurrences;
         this.foundServers = foundServers;
-        this.stopFlag = stopFlag;
         this.checkedListsCount = checkedListsCount;
+        this.alarmThreshold = alarmThreshold;
     }
 
     @Override
     public void run() {
         HostBlacklistsDataSourceFacade skds = HostBlacklistsDataSourceFacade.getInstance();
 
-        for (int i = startIndex; i <= endIndex && !stopFlag.get(); i++) {
-            // Terminación cooperativa anticipada
-            if (globalOccurrences.get() >= BLACK_LIST_ALARM_COUNT) {
-                stopFlag.set(true);
+        for (int i = startIndex; i <= endIndex; i++) {
+            if (globalOccurrences.get() >= alarmThreshold) {
                 break;
             }
-
             boolean in = skds.isInBlackListServer(i, host);
             checkedListsCount.incrementAndGet();
 
@@ -59,8 +52,7 @@ public class BlackListSearchThread extends Thread {
                 foundServers.add(i);
                 localOccurrencesFound++;
                 int occ = globalOccurrences.incrementAndGet();
-                if (occ >= BLACK_LIST_ALARM_COUNT) {
-                    stopFlag.set(true);
+                if (occ >= alarmThreshold) {
                     break;
                 }
             }

@@ -9,7 +9,6 @@ import edu.eci.arsw.spamkeywordsdatasource.HostBlacklistsDataSourceFacade;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -61,7 +60,6 @@ public class HostBlackListsValidator {
         ConcurrentLinkedQueue<Integer> foundServers = new ConcurrentLinkedQueue<>();
         AtomicInteger occurrences = new AtomicInteger(0);
         AtomicInteger checkedListsCount = new AtomicInteger(0);
-        AtomicBoolean stopFlag = new AtomicBoolean(false);
 
         Thread[] workers = new Thread[numThreads];
 
@@ -76,7 +74,7 @@ public class HostBlackListsValidator {
                 end = registeredServers - 1;
             }
             if (start <= end){
-                workers[t] = new BlackListSearchThread(start, end, ipaddress, occurrences, foundServers, stopFlag, checkedListsCount);
+                workers[t] = new BlackListSearchThread(start, end, ipaddress, occurrences, foundServers, checkedListsCount, BLACK_LIST_ALARM_COUNT);
                 workers[t].start();
             } else {
                 workers[t] = null;
